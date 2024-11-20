@@ -137,3 +137,31 @@ $(function () {
         }
     }
 });
+let bird = document.getElementById("bird");
+let pipes = document.querySelectorAll(".pole");
+
+let birdGroups = ["bird-group-1", "bird-group-2", "bird-group-3"];
+let pipeGroups = ["pipe-group-1", "pipe-group-2", "pipe-group-3"];
+
+let currentBirdGroup = 0;
+let currentPipeGroup = 0;
+
+// Chức năng để thay đổi nhóm hình ảnh của bird
+function changeBirdGroup() {
+    bird.classList.remove(...birdGroups); // Xóa các nhóm cũ
+    currentBirdGroup = (currentBirdGroup + 1) % birdGroups.length; // Chuyển sang nhóm kế tiếp
+    bird.classList.add(birdGroups[currentBirdGroup]); // Thêm nhóm mới
+}
+
+// Chức năng để thay đổi nhóm hình ảnh của pipe
+function changePipeGroup() {
+    pipes.forEach(pipe => {
+        pipe.classList.remove(...pipeGroups); // Xóa các nhóm cũ
+        currentPipeGroup = (currentPipeGroup + 1) % pipeGroups.length; // Chuyển sang nhóm kế tiếp
+        pipe.classList.add(pipeGroups[currentPipeGroup]); // Thêm nhóm mới
+    });
+}
+
+// Cài đặt interval để thay đổi hình ảnh mỗi 3 giây
+setInterval(changeBirdGroup, 3000);
+setInterval(changePipeGroup, 3000);
