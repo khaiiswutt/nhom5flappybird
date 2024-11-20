@@ -165,3 +165,50 @@ function changePipeGroup() {
 // Cài đặt interval để thay đổi hình ảnh mỗi 3 giây
 setInterval(changeBirdGroup, 3000);
 setInterval(changePipeGroup, 3000);
+
+
+let score = 0;
+let level = 1;
+let interval = 40;
+let isTransitioning = false; // Biến cờ để kiểm tra xem đang chuyển cảnh hay không
+
+// Mảng lưu trữ các giá trị interval tương ứng với từng level
+const intervals = [40, 30, 25, 20];
+
+// Hàm thực hiện chuyển cảnh mượt mà
+function transitionLevel() {
+  isTransitioning = true;
+
+  setTimeout(() => {
+    isTransitioning = false;
+    // Cập nhật level và interval
+    level++;
+    interval = intervals[level - 1];
+    // Cập nhật giao diện
+    updateLevelDisplay();
+    
+  }, 1000); // Thời gian chuyển cảnh (tùy chỉnh)
+}
+
+function updateGame() {
+ 
+  if (!isTransitioning) {
+    checkLevelUp();
+  }
+ 
+}
+
+function checkLevelUp() {
+  if (score % 5 === 0 && score !== 0 && !isTransitioning) {
+    transitionLevel();
+  }
+
+  // (code kiểm tra level và cập nhật interval như trên)
+  if (score === 50) {
+    clearInterval(gameInterval);
+    alert("Chúc mừng bạn đã hoàn thành trò chơi");
+  }
+}
+
+// Bắt đầu vòng lặp game
+const gameInterval = setInterval(updateGame, interval);
