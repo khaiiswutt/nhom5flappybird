@@ -149,6 +149,21 @@ $(function () {
         go_up = false;
     });
 
+    //Sự kiện khi nhấn phím Arrow down
+    $(document).keydown(function (e) {
+        if (e.key === "ArrowDown") {
+            go_up = setInterval(up, 40);
+        }
+    });
+
+    //Khi nhả phím ra
+    $(document).keyup(function (e) {
+        if (e.key === "ArrowDown") {
+            clearInterval(go_up);
+            go_up = false;
+        }
+    });
+
     // Khi nhấn nút chơi game
     playButton.click(function () {
         playGame();
