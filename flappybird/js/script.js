@@ -10,6 +10,7 @@ $(function () {
     var restartButton = $('#restart_btn');
     var playButton = $('#play_btn');
     
+    
     // Các biến cho game
     var container_width = parseInt(container.width());
     var container_height = parseInt(container.height());
@@ -23,14 +24,16 @@ $(function () {
     var gameActive = false;
     var gameInterval;
     var score_updated = false;
+    var rainStarted = false; // Đánh dấu để biết hiệu ứng mưa đã chạy chưa
+
 
     // Cập nhật điểm số và level
     function updateScoreLevel() {
         scoreDisplay.text('Score: ' + score);
         levelDisplay.text('Level: ' + level);
     }
+   
 
-    // Cập nhật level và thay đổi tốc độ interval
     function updateLevel() {
         if (score >= 50) {
             clearInterval(gameInterval);
@@ -42,14 +45,30 @@ $(function () {
         } else if (score >= 20) {
             level = 3;
             interval = 25;
-        } else if (score >= 5) {
-            level = 2;
+        } else if (score >= 5 && level < 2) { 
+            level = 2; 
             interval = 30;
+            changeBackground('sprites/bg3.png');
+            changePoleColor('#ff3567'); // Ví dụ màu cam
         } else {
             level = 1;
             interval = 40;
         }
     }
+
+    function changeBackground(imageUrl) {
+        $('#container').css({
+            'background-image': `url('${imageUrl}')`,
+            'background-size': 'cover',
+            'background-repeat': 'no-repeat',
+        });
+    }
+    
+    function changePoleColor(newColor) {
+        $('.pole').css('background-color', newColor);
+    }
+
+
 
     // Hàm bắt đầu game
     function playGame() {
@@ -181,3 +200,16 @@ $(function () {
         }
     }, interval);
 });
+
+function createRain() {
+    const rainContainer = $('<div id="rain-container"></div>');
+    $('#container').append(rainContainer);
+
+    // Tạo 100 giọt mưa
+    for (let i = 0; i < 100; i++) {
+        const raindrop = $('<div class="raindrop"></div>');
+        const randomX = Math.random(); // Tọa độ ngẫu nhiên cho mỗi giọt mưa
+        raindrop.css('--x', randomX);
+        rainContainer.append(raindrop);
+    }
+}
