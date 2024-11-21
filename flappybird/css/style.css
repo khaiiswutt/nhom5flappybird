@@ -3,19 +3,20 @@ button {outline: none;}
 body {height: 100%; width: 100%; margin: 0;}
 
 /* Khung game */
-#container {position: relative; height: 480px; width: 350px; border: 1px solid #ccc; background: url('../sprites/bg.png'); overflow: hidden; margin: 80px auto;}
+#container {position: relative; height: 580px; width: 350px; border: 1px solid #ccc; background: url('../sprites/bg2.png'); overflow: hidden; margin: 80px auto;}
 
 /* Con chim */
-#bird {position: absolute; background: url('../sprites/bird.png'); height: 42px; width: 65px; background-size: contain; background-repeat: no-repeat; top: 20%; left: 15%;}
+#bird {position: absolute; background: url('../sprites/canhcut.png'); height: 100px; width: 80px; background-size: contain; background-repeat: no-repeat; top: 20%; left: 15%;}
 
 /* Ống nước */
-.pole {position: absolute; height: 170px; width: 60px; background-color: #33cc33; right: -64px; border: 2px solid #000;}
+.pole {
+    position: absolute; height: 170px; width: 60px; background-color: #062d68; right: -64px; border: 2px solid #f8f8f8;border-radius: 3px;}
 
 /* Ống trên */
 #pole_1 {top: 0; border-top: none;}
 
 /* Ống dưới */
-#pole_2 {bottom: 0; border-bottom: none;}
+#pole_2 {bottom: 0; border-bottom: none;}s
 
 /* Điểm */
 #score {font-size: 100px; position: absolute; width: 100%; text-align: center; padding: 10px; color: #555;}
