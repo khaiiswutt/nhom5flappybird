@@ -5,8 +5,8 @@ $(function () {
     var pole = $('.pole');
     var pole_1 = $('#pole_1');
     var pole_2 = $('#pole_2');
-    var scoreDisplay = $('#score'); // Hiển thị điểm
-    var levelDisplay = $('#level'); // Hiển thị level
+    var scoreDisplay = $('#score');
+    var levelDisplay = $('#level');
     var restartButton = $('#restart_btn');
     var playButton = $('#play_btn');
     
@@ -17,80 +17,105 @@ $(function () {
     var bird_height = parseInt(bird.height());
     var speed = 10; // tốc độ mặc định của các ống
     var go_up = false;
-    var score = 0; // Đảm bảo điểm số bắt đầu từ 0
+    var score = 0;
     var level = 1;
     var interval = 40;
     var gameActive = false;
     var gameInterval;
     var score_updated = false;
 
-    // Hàm cập nhật điểm số và level
+    // Cập nhật điểm số và level
     function updateScoreLevel() {
-        scoreDisplay.text('Điểm: ' + score); // Hiển thị điểm
-        levelDisplay.text('Level: ' + level); // Hiển thị level
+        scoreDisplay.text('Score: ' + score);
+        levelDisplay.text('Level: ' + level);
     }
 
-  // Khi nhấn vào Chơi game
-    $('#play_btn').click(function() {
-         playGame(); // Chạy hàm bắt đầu chơi game
-         $(this).hide(); // Ẩn nút chơi game
-    });
-
-    // Khi nhả chuột ra trong khung game
-    $('#container').mouseup(function (e) {    
-        clearInterval(go_up); // Xoá realtime hành động bay lên cho chú chim
-        go_up = false;
-    });
-
-    // Khi nhấp chuột vào trong khung game
-    $('#container').mousedown(function (e) {
-        go_up = setInterval(up, 40); // Realtime hành động bay lên cho chú chim
-    });
-
-    // Thêm sự kiện keydown cho phím mũi tên xuống (ArrowDown)
-    $(document).keydown(function(e) {
-        if (e.key === "ArrowDown") {  // Kiểm tra nếu phím là "ArrowDown"
-            go_down(); // Gọi hàm cho chim rơi xuống
+    // Cập nhật level và thay đổi tốc độ interval
+    function updateLevel() {
+        if (score >= 50) {
+            clearInterval(gameInterval);
+            alert("Chiến thắng! Bạn đã đạt Level 4!");
+            restartButton.show(); // Hiển thị nút chơi lại
+        } else if (score >= 40) {
+            level = 4;
+            interval = 20;
+        } else if (score >= 20) {
+            level = 3;
+            interval = 25;
+        } else if (score >= 5) {
+            level = 2;
+            interval = 30;
+        } else {
+            level = 1;
+            interval = 40;
         }
-    });
-
-
-    // Hàm di chuyển chú chim rơi xuống
-    function go_down() {
-        bird.css('top', parseInt(bird.css('top')) + 10);
-        bird.css('transform', 'rotate(50deg)'); // Nghiêng chú chim khi rơi xuống
     }
 
-    // Hàm di chuyển chú chim bay lên
+    // Hàm bắt đầu game
+    function playGame() {
+        gameActive = true;
+        score = 0;
+        level = 1;
+        interval = 40;
+        updateScoreLevel();
+        playButton.hide();
+        restartButton.hide();
+        gameLoop();
+    }
+
+    // Hàm vòng lặp chính của game
+    function gameLoop() {
+        gameInterval = setInterval(function () {
+            if (collision(bird, pole_1) || collision(bird, pole_2) || parseInt(bird.css('top')) <= 0 || parseInt(bird.css('top')) > container_height - bird_height) {
+                stopTheGame();
+            } else {
+                var pole_current_position = parseInt(pole.css('right'));
+                if (pole_current_position > container_width - bird_left) {
+                    if (!score_updated) {
+                        score++;
+                        score_updated = true;
+                        updateLevel(); // Kiểm tra cập nhật level
+                        updateScoreLevel();
+                    }
+                }
+                
+                if (pole_current_position > container_width) {
+                    var new_height = parseInt(Math.random() * 100); // Tạo chiều cao ngẫu nhiên
+                    pole_1.css('height', 170 + new_height);
+                    pole_2.css('height', 170 - new_height);
+                    score_updated = false;
+                    pole_current_position = -64;
+                }
+
+                pole.css('right', pole_current_position + speed);
+
+                if (!go_up) {
+                    goDown(); // Nếu không bay lên, chim sẽ rơi xuống
+                }
+            }
+        }, interval); // Điều chỉnh tốc độ theo từng level
+    }
+
+    // Hàm di chuyển chim xuống
+    function goDown() {
+        bird.css('top', parseInt(bird.css('top')) + 10);
+        bird.css('transform', 'rotate(50deg)');
+    }
+
+    // Hàm di chuyển chim bay lên
     function up() {
         bird.css('top', parseInt(bird.css('top')) - 20);
-        bird.css('transform', 'rotate(-10deg)'); // Nghiêng chú chim khi bay lên
+        bird.css('transform', 'rotate(-10deg)');
     }
 
-    // Khi nhả chuột ra trong khung game
-    $('#container').mouseup(function () {    
-        clearInterval(go_up); // Xoá hành động bay lên
-        go_up = false;
-    });
-
-    // Khi nhấp chuột vào trong khung game
-    $('#container').mousedown(function () {
-        go_up = setInterval(up, 40); // Realtime hành động bay lên cho chú chim
-    });
-
-    // Hàm thua game
-    function stop_the_game() {
-        clearInterval(gameInterval); // Dừng game
+    // Hàm dừng game
+    function stopTheGame() {
+        clearInterval(gameInterval);
         gameActive = false;
-        restartButton.slideDown(); // Hiện nút chơi lại
+        restartButton.show();
     }
 
-    // Khi click vào nút Chơi lại
-    restartButton.click(function () {
-        location.reload(); // Tải lại trang
-    });
-
-    // Hàm va chạm giữa 2 object
+    // Kiểm tra va chạm giữa 2 object
     function collision($div1, $div2) {
         var x1 = $div1.offset().left;
         var y1 = $div1.offset().top;
@@ -98,7 +123,7 @@ $(function () {
         var w1 = $div1.outerWidth(true);
         var b1 = y1 + h1;
         var r1 = x1 + w1;
-        
+
         var x2 = $div2.offset().left;
         var y2 = $div2.offset().top;
         var h2 = $div2.outerHeight(true);
@@ -113,4 +138,31 @@ $(function () {
         }
     }
 
+    // Sự kiện khi nhấp chuột vào khung game
+    $('#container').mousedown(function () {
+        go_up = setInterval(up, 40);
+    });
+
+    // Khi nhả chuột ra
+    $('#container').mouseup(function () {
+        clearInterval(go_up);
+        go_up = false;
+    });
+
+    // Khi nhấn nút chơi game
+    playButton.click(function () {
+        playGame();
+    });
+
+    // Khi nhấn nút chơi lại
+    restartButton.click(function () {
+        location.reload();
+    });
+
+    // Đoạn mã kiểm tra va chạm và cập nhật level/score
+    setInterval(function () {
+        if (gameActive) {
+            updateLevel();
+        }
+    }, interval);
 });
