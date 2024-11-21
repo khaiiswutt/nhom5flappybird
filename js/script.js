@@ -158,11 +158,11 @@ $(function () {
         }
     }
 
-    // Sự kiện khi nhấn phím "X" để kích hoạt chế độ bất tử
+   
     $(document).keydown(function (e) {
         if (e.key === "x" || e.key === "X") {
             immortal = true; // Kích hoạt chế độ bất tử
-            immortalStatus.text("Chế độ bất tử: MỞ").show(); // Hiển thị thông báo
+            immortalStatus.text("Chế độ bất tử: MỞ").show(); 
         }
     });
 
@@ -170,7 +170,7 @@ $(function () {
     $(document).keyup(function (e) {
         if (e.key === "x" || e.key === "X") {
             immortal = false; // Tắt chế độ bất tử
-            immortalStatus.text("Chế độ bất tử: ĐÓNG").show(); // Hiển thị thông báo đã tắt chế độ bất tử
+            immortalStatus.text("Chế độ bất tử: ĐÓNG").show(); 
         }
     });
 
