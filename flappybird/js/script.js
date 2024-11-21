@@ -5,68 +5,36 @@ $(function () {
     var pole = $('.pole');
     var pole_1 = $('#pole_1');
     var pole_2 = $('#pole_2');
-    var score = $('#score');
-
-    // Chuyển các thông tin của object sang dạng số thực
+    var scoreDisplay = $('#score'); // Hiển thị điểm
+    var levelDisplay = $('#level'); // Hiển thị level
+    var restartButton = $('#restart_btn');
+    var playButton = $('#play_btn');
+    
+    // Các biến cho game
     var container_width = parseInt(container.width());
     var container_height = parseInt(container.height());
-    var pole_initial_position = parseInt(pole.css('right'));
-    var pole_initial_height = parseInt(pole.css('height'));
     var bird_left = parseInt(bird.css('left'));
     var bird_height = parseInt(bird.height());
-    var speed = 10; 
-
-    // Một số trạng thái trong game
+    var speed = 10; // tốc độ mặc định của các ống
     var go_up = false;
+    var score = 0; // Đảm bảo điểm số bắt đầu từ 0
+    var level = 1;
+    var interval = 40;
+    var gameActive = false;
+    var gameInterval;
     var score_updated = false;
-    var game_over = false;
 
-    // Hàm bắt đầu game
-    function playGame() {
-        // Realtime cho game 
-        var the_game = setInterval(function () {
-            if (collision(bird, pole_1) || // Nếu chú chim va chạm với ống trên
-                collision(bird, pole_2) || // Hoặc chú chim va chạm với ông dưới
-                parseInt(bird.css('top')) <= 0 || // Hoặc chú chim va chạp với khung game trên
-                parseInt(bird.css('top')) > container_height - bird_height // Hoặc chú chim va chạm với khung game dưới
-                )
-            {
-                stop_the_game(); // Chạy hàm thua game
-            }
-            else
-            {
-                // Lấy vị trị hiện tại của ống nước
-                var pole_current_position = parseInt(pole.css('right'));
-                // Cập nhập điểm khi chú chim vượt qua 1 cặp ống
-                if (pole_current_position > container_width - bird_left)
-                {
-                    if (score_updated === false)
-                    {
-                        score.text(parseInt(score.text()) + 1); // Cộng 1 điểm
-                        score_updated = true;
-                    }
-                }
-
-                // Kiểm tra các ống đã đi ra khỏi khung game 
-                if (pole_current_position > container_width) {
-                    var new_height = parseInt(Math.random() * 100); 
-                    // Tạo chiều cao các ống nước ngẫu nhiên
-                    pole_1.css('height', pole_initial_height + new_height);
-                    pole_2.css('height', pole_initial_height - new_height);
-                    score_updated = false;
-                    pole_current_position = pole_initial_position; // Gán vị trị hiện tại = vị trí ban đầu của ống nước
-                }
-
-                // Di chuyển ống nước
-                pole.css('right', pole_current_position + speed);
-
-                // Nếu không điều khiển chú chim bay lên
-                if (go_up === false) {
-                    go_down(); // Hàm di chuyển chú chim rơi xuống
-                }
-            }
-        }, 40);
+    // Hàm cập nhật điểm số và level
+    function updateScoreLevel() {
+        scoreDisplay.text('Điểm: ' + score); // Hiển thị điểm
+        levelDisplay.text('Level: ' + level); // Hiển thị level
     }
+
+  // Khi nhấn vào Chơi game
+    $('#play_btn').click(function() {
+         playGame(); // Chạy hàm bắt đầu chơi game
+         $(this).hide(); // Ẩn nút chơi game
+    });
 
     // Khi nhả chuột ra trong khung game
     $('#container').mouseup(function (e) {    
@@ -79,39 +47,51 @@ $(function () {
         go_up = setInterval(up, 40); // Realtime hành động bay lên cho chú chim
     });
 
-    // Khi nhấn vào Chơi game
-    $('#play_btn').click(function() {
-         playGame(); // Chạy hàm bắt đầu chơi game
-         $(this).hide(); // Ẩn nút chơi game
-    });    
+    // Thêm sự kiện keydown cho phím mũi tên xuống (ArrowDown)
+    $(document).keydown(function(e) {
+        if (e.key === "ArrowDown") {  // Kiểm tra nếu phím là "ArrowDown"
+            go_down(); // Gọi hàm cho chim rơi xuống
+        }
+    });
+
 
     // Hàm di chuyển chú chim rơi xuống
     function go_down() {
         bird.css('top', parseInt(bird.css('top')) + 10);
-        bird.css('transform', 'rotate(50deg)'); // Nghiêng object chú chim 50 độ
+        bird.css('transform', 'rotate(50deg)'); // Nghiêng chú chim khi rơi xuống
     }
 
     // Hàm di chuyển chú chim bay lên
     function up() {
         bird.css('top', parseInt(bird.css('top')) - 20);
-        bird.css('transform', 'rotate(-10deg)'); // Nghiêng object chú chim -10 độ
+        bird.css('transform', 'rotate(-10deg)'); // Nghiêng chú chim khi bay lên
     }
+
+    // Khi nhả chuột ra trong khung game
+    $('#container').mouseup(function () {    
+        clearInterval(go_up); // Xoá hành động bay lên
+        go_up = false;
+    });
+
+    // Khi nhấp chuột vào trong khung game
+    $('#container').mousedown(function () {
+        go_up = setInterval(up, 40); // Realtime hành động bay lên cho chú chim
+    });
 
     // Hàm thua game
     function stop_the_game() {
-        clearInterval(playGame()); // Xoá realtime chơi game
-        game_over = true;
-        $('#restart_btn').slideDown(); // Hiện nút chơi lại
+        clearInterval(gameInterval); // Dừng game
+        gameActive = false;
+        restartButton.slideDown(); // Hiện nút chơi lại
     }
 
     // Khi click vào nút Chơi lại
-    $('#restart_btn').click(function () {
+    restartButton.click(function () {
         location.reload(); // Tải lại trang
     });
 
     // Hàm va chạm giữa 2 object
     function collision($div1, $div2) {
-        // Khai báo các thông số của 2 object
         var x1 = $div1.offset().left;
         var y1 = $div1.offset().top;
         var h1 = $div1.outerHeight(true);
@@ -126,89 +106,11 @@ $(function () {
         var b2 = y2 + h2;
         var r2 = x2 + w2;
 
-        // Nếu xảy ra va chạm
         if (b1 < y2 || y1 > b2 || r1 < x2 || x1 > r2) {
             return false;
-        }
-        // Ngược lại không va chạm
-        else
-        {
+        } else {
             return true;
         }
     }
+
 });
-let bird = document.getElementById("bird");
-let pipes = document.querySelectorAll(".pole");
-
-let birdGroups = ["bird-group-1", "bird-group-2", "bird-group-3"];
-let pipeGroups = ["pipe-group-1", "pipe-group-2", "pipe-group-3"];
-
-let currentBirdGroup = 0;
-let currentPipeGroup = 0;
-
-// Chức năng để thay đổi nhóm hình ảnh của bird
-function changeBirdGroup() {
-    bird.classList.remove(...birdGroups); // Xóa các nhóm cũ
-    currentBirdGroup = (currentBirdGroup + 1) % birdGroups.length; // Chuyển sang nhóm kế tiếp
-    bird.classList.add(birdGroups[currentBirdGroup]); // Thêm nhóm mới
-}
-
-// Chức năng để thay đổi nhóm hình ảnh của pipe
-function changePipeGroup() {
-    pipes.forEach(pipe => {
-        pipe.classList.remove(...pipeGroups); // Xóa các nhóm cũ
-        currentPipeGroup = (currentPipeGroup + 1) % pipeGroups.length; // Chuyển sang nhóm kế tiếp
-        pipe.classList.add(pipeGroups[currentPipeGroup]); // Thêm nhóm mới
-    });
-}
-
-// Cài đặt interval để thay đổi hình ảnh mỗi 3 giây
-setInterval(changeBirdGroup, 3000);
-setInterval(changePipeGroup, 3000);
-
-
-let score = 0;
-let level = 1;
-let interval = 40;
-let isTransitioning = false; // Biến cờ để kiểm tra xem đang chuyển cảnh hay không
-
-// Mảng lưu trữ các giá trị interval tương ứng với từng level
-const intervals = [40, 30, 25, 20];
-
-// Hàm thực hiện chuyển cảnh mượt mà
-function transitionLevel() {
-  isTransitioning = true;
-
-  setTimeout(() => {
-    isTransitioning = false;
-    // Cập nhật level và interval
-    level++;
-    interval = intervals[level - 1];
-    // Cập nhật giao diện
-    updateLevelDisplay();
-    
-  }, 1000); // Thời gian chuyển cảnh (tùy chỉnh)
-}
-
-function updateGame() {
- 
-  if (!isTransitioning) {
-    checkLevelUp();
-  }
- 
-}
-
-function checkLevelUp() {
-  if (score % 5 === 0 && score !== 0 && !isTransitioning) {
-    transitionLevel();
-  }
-
-  // (code kiểm tra level và cập nhật interval như trên)
-  if (score === 50) {
-    clearInterval(gameInterval);
-    alert("Chúc mừng bạn đã hoàn thành trò chơi");
-  }
-}
-
-// Bắt đầu vòng lặp game
-const gameInterval = setInterval(updateGame, interval);
