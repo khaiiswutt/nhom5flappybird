@@ -9,7 +9,7 @@ $(function () {
     var levelDisplay = $('#level');
     var restartButton = $('#restart_btn');
     var playButton = $('#play_btn');
-    
+    var immortalStatus = $('#immortalStatus'); // Phần tử hiển thị trạng thái bất tử
     
     // Các biến cho game
     var container_width = parseInt(container.width());
@@ -24,16 +24,14 @@ $(function () {
     var gameActive = false;
     var gameInterval;
     var score_updated = false;
-    var rainStarted = false; // Đánh dấu để biết hiệu ứng mưa đã chạy chưa
-
-
+    var immortal = false; // Biến trạng thái bất tử
+    
     // Cập nhật điểm số và level
     function updateScoreLevel() {
         scoreDisplay.text('Score: ' + score);
         levelDisplay.text('Level: ' + level);
     }
    
-
     function updateLevel() {
         if (score >= 50) {
             clearInterval(gameInterval);
@@ -42,9 +40,14 @@ $(function () {
         } else if (score >= 40) {
             level = 4;
             interval = 20;
+        } else if (score >= 30) {
+            changeBackground('sprites/bg5.png');
+            changePoleColor('#6ED6D6');
         } else if (score >= 20) {
             level = 3;
             interval = 25;
+            changeBackground('sprites/bg4.png');
+            changePoleColor('#f6d5f7');
         } else if (score >= 5 && level < 2) { 
             level = 2; 
             interval = 30;
@@ -63,12 +66,10 @@ $(function () {
             'background-repeat': 'no-repeat',
         });
     }
-    
+
     function changePoleColor(newColor) {
         $('.pole').css('background-color', newColor);
     }
-
-
 
     // Hàm bắt đầu game
     function playGame() {
@@ -85,7 +86,7 @@ $(function () {
     // Hàm vòng lặp chính của game
     function gameLoop() {
         gameInterval = setInterval(function () {
-            if (collision(bird, pole_1) || collision(bird, pole_2) || parseInt(bird.css('top')) <= 0 || parseInt(bird.css('top')) > container_height - bird_height) {
+            if (!immortal && (collision(bird, pole_1) || collision(bird, pole_2) || parseInt(bird.css('top')) <= 0 || parseInt(bird.css('top')) > container_height - bird_height)) {
                 stopTheGame();
             } else {
                 var pole_current_position = parseInt(pole.css('right'));
@@ -157,6 +158,22 @@ $(function () {
         }
     }
 
+    // Sự kiện khi nhấn phím "X" để kích hoạt chế độ bất tử
+    $(document).keydown(function (e) {
+        if (e.key === "x" || e.key === "X") {
+            immortal = true; // Kích hoạt chế độ bất tử
+            immortalStatus.text("Chế độ bất tử: MỞ").show(); // Hiển thị thông báo
+        }
+    });
+
+    // Sự kiện khi nhả phím "X"
+    $(document).keyup(function (e) {
+        if (e.key === "x" || e.key === "X") {
+            immortal = false; // Tắt chế độ bất tử
+            immortalStatus.text("Chế độ bất tử: ĐÓNG").show(); // Hiển thị thông báo đã tắt chế độ bất tử
+        }
+    });
+
     // Sự kiện khi nhấp chuột vào khung game
     $('#container').mousedown(function () {
         go_up = setInterval(up, 40);
@@ -166,21 +183,6 @@ $(function () {
     $('#container').mouseup(function () {
         clearInterval(go_up);
         go_up = false;
-    });
-
-    //Sự kiện khi nhấn phím Arrow down
-    $(document).keydown(function (e) {
-        if (e.key === "ArrowDown") {
-            go_up = setInterval(up, 40);
-        }
-    });
-
-    //Khi nhả phím ra
-    $(document).keyup(function (e) {
-        if (e.key === "ArrowDown") {
-            clearInterval(go_up);
-            go_up = false;
-        }
     });
 
     // Khi nhấn nút chơi game
@@ -200,16 +202,3 @@ $(function () {
         }
     }, interval);
 });
-
-function createRain() {
-    const rainContainer = $('<div id="rain-container"></div>');
-    $('#container').append(rainContainer);
-
-    // Tạo 100 giọt mưa
-    for (let i = 0; i < 100; i++) {
-        const raindrop = $('<div class="raindrop"></div>');
-        const randomX = Math.random(); // Tọa độ ngẫu nhiên cho mỗi giọt mưa
-        raindrop.css('--x', randomX);
-        rainContainer.append(raindrop);
-    }
-}
