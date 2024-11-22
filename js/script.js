@@ -116,6 +116,8 @@ $(function () {
         }, interval); // Điều chỉnh tốc độ theo từng level
     }
 
+     
+
     // Hàm di chuyển chim xuống
     function goDown() {
         bird.css('top', parseInt(bird.css('top')) + 10);
@@ -183,6 +185,21 @@ $(function () {
     $('#container').mouseup(function () {
         clearInterval(go_up);
         go_up = false;
+    });
+
+     //Sự kiện khi nhấn phím Arrow down
+     $(document).keydown(function (e) {
+        if (e.key === "ArrowDown") {
+            go_up = setInterval(up, 40);
+        }
+    });
+
+    //Khi nhả phím ra
+    $(document).keyup(function (e) {
+        if (e.key === "ArrowDown") {
+            clearInterval(go_up);
+            go_up = false;
+        }
     });
 
     // Khi nhấn nút chơi game
